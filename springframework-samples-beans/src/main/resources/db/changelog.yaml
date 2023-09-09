@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: init
+      author: xxxx
+      changes:
+        - sqlFile:
+            path: db/sql/schema.sql
+        - sqlFile:
+            path: db/sql/clients_table.sql
