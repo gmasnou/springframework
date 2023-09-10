@@ -10,7 +10,6 @@ import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.h2.jdbcx.JdbcDataSource;
-import org.h2.tools.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -35,7 +34,7 @@ public class InfraConfigurationTest {
         jdbcDataSource.setUser(USERNAME);
         jdbcDataSource.setPassword(PASSWORD);
         liquibase(connection);
-        Server.startWebServer(connection);
+        //Server.startWebServer(connection);
         return jdbcDataSource;
     }
 
