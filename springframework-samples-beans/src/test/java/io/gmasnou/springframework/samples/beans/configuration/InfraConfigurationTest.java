@@ -5,16 +5,15 @@ import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import org.h2.jdbcx.JdbcConnectionPool;
-import org.h2.jdbcx.JdbcDataSource;
+import org.hibernate.boot.registry.StandardServiceRegistry;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -22,42 +21,34 @@ import java.sql.SQLException;
 @Import(value = {AppConfiguration.class})
 public class InfraConfigurationTest {
 
-    private static final String URL = "jdbc:h2:mem:test;INIT=CREATE SCHEMA IF NOT EXISTS testww";
+    private static final String URL = "jdbc:h2:mem:test";
     private static final String USERNAME = "sa";
     private static final String PASSWORD = "";
 
-    @Bean
-    public DataSource dataSource(Connection connection) throws SQLException {
 
-        JdbcDataSource jdbcDataSource = new JdbcDataSource();
-        jdbcDataSource.setURL(URL);
-        jdbcDataSource.setUser(USERNAME);
-        jdbcDataSource.setPassword(PASSWORD);
-        liquibase(connection);
-        //Server.startWebServer(connection);
-        return jdbcDataSource;
+    @Bean
+    public StandardServiceRegistry standardServiceRegistry() throws SQLException, LiquibaseException {
+
+        initialize();
+
+        StandardServiceRegistry registry =
+                new StandardServiceRegistryBuilder()
+                        .loadProperties("hibernate-test.properties")
+                        .build();
+        return registry;
     }
 
-    @Bean
-    public Connection connection() throws SQLException {
+    public void initialize() throws SQLException, LiquibaseException {
 
         final JdbcConnectionPool cp = JdbcConnectionPool.create(URL, USERNAME, PASSWORD);
-        return cp.getConnection();
+        populateWithLiquibase(cp.getConnection());
     }
 
-    private void liquibase(Connection connection) {
+    private void populateWithLiquibase(Connection connection) throws LiquibaseException {
 
-        Database database = null;
-        try {
-            database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-        } catch (DatabaseException e) {
-            throw new RuntimeException(e);
-        }
+        Database database = database = DatabaseFactory.getInstance()
+                .findCorrectDatabaseImplementation(new JdbcConnection(connection));
         Liquibase liquibase = new Liquibase("db/changelog.yaml", new ClassLoaderResourceAccessor(), database);
-        try {
-            liquibase.update();
-        } catch (LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        liquibase.update();
     }
 }

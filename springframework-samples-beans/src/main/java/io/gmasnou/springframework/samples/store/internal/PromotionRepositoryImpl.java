@@ -2,16 +2,16 @@ package io.gmasnou.springframework.samples.store.internal;
 
 import io.gmasnou.springframework.samples.commons.Product;
 import io.gmasnou.springframework.samples.commons.Promotion;
+import org.hibernate.SessionFactory;
 
-import javax.sql.DataSource;
 import java.util.Optional;
 
 public class PromotionRepositoryImpl implements PromotionRepository {
 
-    private final DataSource dataSource;
+    private final SessionFactory sessionFactory;
 
-    public PromotionRepositoryImpl(DataSource dataSource) {
-        this.dataSource = dataSource;
+    public PromotionRepositoryImpl(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
     }
 
     @Override
